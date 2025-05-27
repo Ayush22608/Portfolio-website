@@ -201,19 +201,19 @@ const About = () => {
           </motion.div>
 
           <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-6">
-            <div className="flex justify-center gap-4 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mb-6">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                  className={`flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg transition-colors text-xs sm:text-sm ${
                     activeTab === tab.id
                       ? 'bg-primary text-white dark:text-black'
                       : 'text-foreground/80 hover:text-foreground hover:bg-white/5'
                   }`}
                 >
                   {tab.icon}
-                  <span>{tab.label}</span>
+                  <span className="whitespace-nowrap">{tab.label}</span>
                 </button>
               ))}
             </div>
