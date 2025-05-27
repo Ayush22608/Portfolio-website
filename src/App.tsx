@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useSpring } from 'framer-motion';
+import { motion, useScroll, useSpring, useTransform } from 'framer-motion';
 import { Sun, Moon } from 'lucide-react';
 
 import Navbar from './components/Navbar';
@@ -11,7 +11,7 @@ import Footer from './components/Footer';
 import { ThemeProvider } from './context/ThemeContext';
 import Button from './components/ui/Button';
 
-function App() {
+const App = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window !== 'undefined') {
       const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
@@ -22,8 +22,15 @@ function App() {
 
   const [currentPage, setCurrentPage] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const totalPages = 4; // Hero, About, Projects, Contact
+
+  const backgroundY = useTransform(
+    useScroll().scrollYProgress,
+    [0, 1],
+    ['0%', '100%']
+  );
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -32,8 +39,22 @@ function App() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
+      if (isMobile) return; // Don't handle wheel events on mobile
+      
       e.preventDefault();
       
       if (isScrolling) return; // Prevent multiple scrolls while animation is in progress
@@ -57,10 +78,10 @@ function App() {
         container.removeEventListener('wheel', handleWheel);
       }
     };
-  }, [currentPage, isScrolling]);
+  }, [currentPage, isScrolling, isMobile]);
 
   useEffect(() => {
-    if (scrollContainerRef.current) {
+    if (!isMobile && scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({
         left: currentPage * window.innerWidth,
         behavior: 'smooth'
@@ -73,7 +94,7 @@ function App() {
       
       return () => clearTimeout(timer);
     }
-  }, [currentPage]);
+  }, [currentPage, isMobile]);
 
   const toggleTheme = () => {
     setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
@@ -82,12 +103,38 @@ function App() {
   return (
     <ThemeProvider value={{ theme, setTheme }}>
       <div className="fixed inset-0 bg-background text-foreground transition-colors duration-300">
-        {/* Background Pattern with Overlay */}
-        <div className="background-pattern" />
-        <div className="background-overlay" />
+        {/* Animated Background Pattern with Overlay */}
+        <motion.div 
+          className="background-pattern"
+          style={{ y: backgroundY }}
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [0.5, 0.7, 0.5]
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        />
+        <motion.div 
+          className="background-overlay"
+          animate={{
+            opacity: [0.7, 0.8, 0.7]
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
 
         {/* Theme Toggle Button */}
-        <div className="fixed bottom-6 right-6 z-50">
+        <motion.div 
+          className="fixed bottom-6 right-6 z-50"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+        >
           <Button
             onClick={toggleTheme}
             variant="ghost"
@@ -103,39 +150,59 @@ function App() {
               {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
             </motion.div>
           </Button>
-        </div>
+        </motion.div>
 
-        <div className="h-screen flex flex-col">
+        <div className={`${isMobile ? 'h-auto' : 'h-screen'} flex flex-col`}>
           <Navbar currentPage={currentPage} onNavigate={setCurrentPage} />
           <main className="flex-1 relative">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
-              className="h-full"
+              className={isMobile ? 'h-auto' : 'h-full'}
             >
               <div 
                 ref={scrollContainerRef}
-                className="h-full overflow-x-auto overflow-y-hidden"
+                className={`${isMobile ? 'overflow-y-auto overflow-x-hidden' : 'h-full overflow-x-auto overflow-y-hidden'}`}
                 style={{ 
                   scrollbarWidth: 'none', 
                   msOverflowStyle: 'none',
                   scrollBehavior: 'smooth'
                 }}
               >
-                <div className="flex h-full">
-                  <div className="w-screen flex-shrink-0">
+                <div className={`${isMobile ? 'flex flex-col' : 'flex h-full'}`}>
+                  <motion.div 
+                    className={`${isMobile ? 'w-full' : 'w-screen flex-shrink-0'}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
                     <Hero />
-                  </div>
-                  <div className="w-screen flex-shrink-0">
+                  </motion.div>
+                  <motion.div 
+                    className={`${isMobile ? 'w-full' : 'w-screen flex-shrink-0'}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
+                  >
                     <About />
-                  </div>
-                  <div className="w-screen flex-shrink-0">
+                  </motion.div>
+                  <motion.div 
+                    className={`${isMobile ? 'w-full' : 'w-screen flex-shrink-0'}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                  >
                     <Projects />
-                  </div>
-                  <div className="w-screen flex-shrink-0">
+                  </motion.div>
+                  <motion.div 
+                    className={`${isMobile ? 'w-full' : 'w-screen flex-shrink-0'}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                  >
                     <Contact />
-                  </div>
+                  </motion.div>
                 </div>
               </div>
             </motion.div>
@@ -145,6 +212,6 @@ function App() {
       </div>
     </ThemeProvider>
   );
-}
+};
 
 export default App;
