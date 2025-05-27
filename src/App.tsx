@@ -7,7 +7,6 @@ import Hero from './components/Hero';
 import About from './components/About';
 import Projects from './components/Projects';
 import Contact from './components/Contact';
-import Footer from './components/Footer';
 import { ThemeProvider } from './context/ThemeContext';
 import Button from './components/ui/Button';
 
@@ -69,7 +68,7 @@ const App = () => {
     };
 
     const container = scrollContainerRef.current;
-    if (container) {
+    if (container && !isMobile) {
       container.addEventListener('wheel', handleWheel, { passive: false });
     }
 
@@ -102,7 +101,7 @@ const App = () => {
 
   return (
     <ThemeProvider value={{ theme, setTheme }}>
-      <div className="fixed inset-0 bg-background text-foreground transition-colors duration-300">
+      <div className={`${isMobile ? 'relative' : 'fixed'} inset-0 bg-background text-foreground transition-colors duration-300`}>
         {/* Animated Background Pattern with Overlay */}
         <motion.div 
           className="background-pattern"
@@ -152,62 +151,51 @@ const App = () => {
           </Button>
         </motion.div>
 
-        <div className={`${isMobile ? 'h-auto' : 'h-screen'} flex flex-col`}>
+        <div className={`${isMobile ? 'min-h-screen' : 'h-screen'} flex flex-col bg-background`}>
           <Navbar currentPage={currentPage} onNavigate={setCurrentPage} />
-          <main className="flex-1 relative">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              className={isMobile ? 'h-auto' : 'h-full'}
-            >
+          <main className="flex-1 bg-background">
+            {isMobile ? (
+              <div className="flex flex-col bg-background">
+                <section id="hero" className="w-full min-h-screen bg-background">
+                  <Hero />
+                </section>
+                <section id="about" className="w-full min-h-screen bg-background">
+                  <About />
+                </section>
+                <section id="projects" className="w-full min-h-screen bg-background">
+                  <Projects />
+                </section>
+                <section id="contact" className="w-full min-h-screen bg-background">
+                  <Contact />
+                </section>
+              </div>
+            ) : (
               <div 
                 ref={scrollContainerRef}
-                className={`${isMobile ? 'overflow-y-auto overflow-x-hidden' : 'h-full overflow-x-auto overflow-y-hidden'}`}
+                className="h-full overflow-x-auto overflow-y-hidden bg-background"
                 style={{ 
                   scrollbarWidth: 'none', 
                   msOverflowStyle: 'none',
                   scrollBehavior: 'smooth'
                 }}
               >
-                <div className={`${isMobile ? 'flex flex-col' : 'flex h-full'}`}>
-                  <motion.div 
-                    className={`${isMobile ? 'w-full' : 'w-screen flex-shrink-0'}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
+                <div className="flex h-full bg-background">
+                  <section id="hero" className="w-screen flex-shrink-0 bg-background">
                     <Hero />
-                  </motion.div>
-                  <motion.div 
-                    className={`${isMobile ? 'w-full' : 'w-screen flex-shrink-0'}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.1 }}
-                  >
+                  </section>
+                  <section id="about" className="w-screen flex-shrink-0 bg-background">
                     <About />
-                  </motion.div>
-                  <motion.div 
-                    className={`${isMobile ? 'w-full' : 'w-screen flex-shrink-0'}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                  >
+                  </section>
+                  <section id="projects" className="w-screen flex-shrink-0 bg-background">
                     <Projects />
-                  </motion.div>
-                  <motion.div 
-                    className={`${isMobile ? 'w-full' : 'w-screen flex-shrink-0'}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.3 }}
-                  >
+                  </section>
+                  <section id="contact" className="w-screen flex-shrink-0 bg-background">
                     <Contact />
-                  </motion.div>
+                  </section>
                 </div>
               </div>
-            </motion.div>
+            )}
           </main>
-          <Footer />
         </div>
       </div>
     </ThemeProvider>

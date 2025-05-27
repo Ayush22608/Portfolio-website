@@ -28,6 +28,27 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isOpen]);
 
+  const handleNavigation = (index: number) => {
+    onNavigate(index);
+    setIsOpen(false);
+    
+    // Get the section element
+    const sectionId = navItems[index].href.substring(1);
+    const element = document.getElementById(sectionId);
+    
+    if (element) {
+      // Calculate the offset for the navbar height
+      const navbarHeight = 57; // Height of the navbar
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - navbarHeight;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <>
       {/* Progress Bar */}
@@ -49,7 +70,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
           <div className="container mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
               <motion.button
-                onClick={() => onNavigate(0)}
+                onClick={() => handleNavigation(0)}
                 className="text-2xl font-heading font-semibold relative group"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -65,7 +86,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
                 {navItems.map((item, index) => (
                   <motion.button
                     key={item.name}
-                    onClick={() => onNavigate(index)}
+                    onClick={() => handleNavigation(index)}
                     className={`text-foreground/80 hover:text-foreground relative group ${
                       currentPage === index ? 'text-foreground' : ''
                     }`}
@@ -101,7 +122,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
 
         {/* Mobile Navigation */}
         <motion.div
-          className="md:hidden"
+          className="md:hidden fixed inset-x-0 top-[57px] z-50"
           initial={false}
           animate={isOpen ? "open" : "closed"}
           variants={{
@@ -115,12 +136,9 @@ const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
               {navItems.map((item, index) => (
                 <motion.button
                   key={item.name}
-                  onClick={() => {
-                    onNavigate(index);
-                    setIsOpen(false);
-                  }}
+                  onClick={() => handleNavigation(index)}
                   className={`text-foreground/80 hover:text-foreground py-2 text-left ${
-                    currentPage === index ? 'text-foreground' : ''
+                    currentPage === index ? 'text-foreground font-semibold' : ''
                   }`}
                   whileHover={{ x: 10 }}
                   whileTap={{ scale: 0.95 }}
