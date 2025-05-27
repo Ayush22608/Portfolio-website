@@ -222,7 +222,7 @@ const Contact = () => {
                 </div>
                 <button
                   type="submit"
-                  className="w-full px-6 py-3 rounded-lg bg-primary text-white font-semibold hover:bg-primary/90 transition-colors"
+                  className="w-full px-6 py-3 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors"
                 >
                   Send Message
                 </button>
